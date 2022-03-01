@@ -9,7 +9,7 @@
 int main (int argc, char* argv[])
 {
     int i;
-    double pi=0.0, result=0.0, sum=0.0, x;
+    double pi=0.0, result=0.0, x;
     struct timeval t1, t2;
     long t;
 
