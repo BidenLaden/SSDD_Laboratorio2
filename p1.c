@@ -4,9 +4,11 @@
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 #define NUM_THREADS	2
 #define ITER 		10
+
 
 void funcion(int *id) {
 	int j;
@@ -19,7 +21,6 @@ void funcion(int *id) {
 		usleep((int) (k * 100000)); // duerme entre 0 y 100 ms
 		printf("Ejecuta el thread %d iteracion %d \n", mid, j );
 	}
-	
 	pthread_exit(NULL);
 
 }

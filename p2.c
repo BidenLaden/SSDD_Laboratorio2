@@ -4,26 +4,32 @@
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <semaphore.h>
 
 #define NUM_THREADS	2
 #define ITER 		10
 
-sem_t sem;
+
+
+/*Mutex y variables condicionales para proteger la variable*/
+pthread_mutex_t mutex;
+//pthread_cond_t condicion;
 
 void funcion(int *id) {
-    sem_wait(&sem);
 	int j;
 	int s;
 	double k;
 	int mid = *id;  // cada thread recibe un número (0 o 1)
+
+	pthread_mutex_lock(&mutex);
 
 	for(j=0 ; j < ITER; j++) {
 		k = (double) rand_r((unsigned int *) &s) / RAND_MAX;	
 		usleep((int) (k * 100000)); // duerme entre 0 y 100 ms
 		printf("Ejecuta el thread %d iteracion %d \n", mid, j );
 	}
-	sem_post(&sem);
+	
+	pthread_mutex_unlock(&mutex);
+
 	pthread_exit(NULL);
 
 }
@@ -35,7 +41,13 @@ int main(int argc, char *argv[])
 	pthread_t thid[NUM_THREADS];
 	struct timeval t;
 
-    sem_init(&sem, 0, 1); 
+	pthread_mutex_init(&mutex, NULL);
+	//pthread_cond_init(&condicion, NULL);
+	pthread_attr_init(&attr);
+
+	/*Atributos de los threads, que son independientes*/
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	
 
 	gettimeofday(&t, NULL);
 	srand(t.tv_sec);	// se inicializa la semilla de nª pseudoaleatorios
