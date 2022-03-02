@@ -9,8 +9,6 @@
 #define NUM_THREADS	2
 #define ITER 		10
 
-
-
 /*Mutex y variables condicionales para proteger la variable*/
 pthread_mutex_t mutex;
 int mutex_no_Cogido = true;
@@ -25,7 +23,6 @@ void funcion(int *id) {
 	pthread_mutex_lock(&mutex);
 	mutex_no_Cogido = false;
 
-
 	for(j=0 ; j < ITER; j++) {
 		k = (double) rand_r((unsigned int *) &s) / RAND_MAX;	
 		usleep((int) (k * 100000)); // duerme entre 0 y 100 ms
@@ -38,7 +35,6 @@ void funcion(int *id) {
 	pthread_exit(NULL);
 
 }
-
 int main(int argc, char *argv[])
 {
 	int j;
@@ -61,12 +57,16 @@ int main(int argc, char *argv[])
 
 	for (j = 0; j < NUM_THREADS; j++)
 		if (pthread_create(&thid[j], NULL, (void *) funcion, &j) == 0){
+			//Seccion critica
 			pthread_mutex_lock(&mutex);
 			while(mutex_no_Cogido){
 				pthread_cond_wait(&condicion, &mutex);
 			}
 			mutex_no_Cogido = true;
 			pthread_mutex_unlock(&mutex);	
+		}else{
+			printf("Error al crear los threads\n");
+			exit(0);
 		}
 
 	for (j = 0; j < NUM_THREADS; j++)
