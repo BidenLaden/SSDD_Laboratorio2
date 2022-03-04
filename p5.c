@@ -6,8 +6,10 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-
-#define NUM_THREADS	2
+//En p4, si cambiamos NUM_THREADS a 10 por ejemplo, se bloquea debido al while(turno != mid)
+//Ya que al hacer el wait(&condicion1, &mutex1); no sabemos cual se despierta, y solo se puede ejecutar
+//un thread, si no es el que cumple la condicion, se bloqueara porque no hay nadie que haga signal
+#define NUM_THREADS	10
 #define ITER 		10
 
 pthread_mutex_t mutex;
@@ -48,7 +50,8 @@ void funcion(int *id) {
 		pthread_mutex_lock(&mutex1);
 		turno = (mid + 1)%NUM_THREADS; //Para que salga 0 o 1
 
-		pthread_cond_signal(&condicion1);
+        //AQUI ESTA EL CAMBIO, EN VEZ DEL SIGNAL SE CAMBIA POR UN BROADCAST PORQUE DEPIERTA A TODOS
+		pthread_cond_broadcast(&condicion1);
 		pthread_mutex_unlock(&mutex1);
 
 
