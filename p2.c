@@ -11,17 +11,19 @@
 
 /*Mutex y variables condicionales para proteger la variable*/
 pthread_mutex_t mutex;
-int mutex_no_Cogido = true;
+int copiado = false;
 pthread_cond_t condicion;
 
 void funcion(int *id) {
 	int j;
 	int s;
 	double k;
-	int mid = *id;  // cada thread recibe un número (0 o 1)
 
 	pthread_mutex_lock(&mutex);
-	mutex_no_Cogido = false;
+	//Aqui esta la seccion critica, esta asignacion:
+	int mid = *id;  // cada thread recibe un número (0 o 1)
+
+	copiado = true;
 
 	for(j=0 ; j < ITER; j++) {
 		k = (double) rand_r((unsigned int *) &s) / RAND_MAX;	
@@ -37,6 +39,10 @@ void funcion(int *id) {
 }
 int main(int argc, char *argv[])
 {
+	//El main es un PROCESO LIGERO!!! 
+	//Y como tal tiene que bloquearse(por eso hace un lock con su correspondiente unlock) para dar paso
+	//a los threads
+
 	int j;
 	pthread_attr_t attr;
 	pthread_t thid[NUM_THREADS];
@@ -59,10 +65,12 @@ int main(int argc, char *argv[])
 		if (pthread_create(&thid[j], NULL, (void *) funcion, &j) == 0){
 			//Seccion critica
 			pthread_mutex_lock(&mutex);
-			while(mutex_no_Cogido){
-				pthread_cond_wait(&condicion, &mutex);
+			while(copiado == false){
+				pthread_cond_wait(&condicion, &mutex);//El wait libera el mutex, se bloquea en el mutex de void*
+				//el wait tiene implicito un unlock y un lock (en ese orden)
 			}
-			mutex_no_Cogido = true;
+			
+			copiado = false;
 			pthread_mutex_unlock(&mutex);	
 		}else{
 			printf("Error al crear los threads\n");
