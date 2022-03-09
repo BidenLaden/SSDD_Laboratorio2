@@ -4,7 +4,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <semaphore.h>
 
 #define NUM_THREADS	2
 #define ITER 		10
